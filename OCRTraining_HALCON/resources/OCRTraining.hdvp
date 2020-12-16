@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="13.0.2.1">
+<procedure name="OCRTraining">
+<interface>
+<io>
+<par name="TrainingImage" base_type="iconic" dimension="0"/>
+</io>
+<ic>
+<par name="OCRFilename" base_type="ctrl" dimension="0"/>
+<par name="Labels" base_type="ctrl" dimension="0"/>
+<par name="OCRTrainingFilename" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="WrittenFilename" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<l>global tuple APPDATA_PUBLIC</l>
+<c>* Conversion rgb to gray image</c>
+<l>rgb1_to_gray (TrainingImage, GrayImage)</l>
+<c>* Segment the image</c>
+<l>binary_threshold (GrayImage, Region, 'max_separability', 'dark', UsedThreshold)</l>
+<c>* Connect the dots of the i's and j's</c>
+<l>dilation_rectangle1(Region, RegionDilation, 0.5,6)</l>
+<l>erosion_circle(RegionDilation, RegionMorph, 3)</l>
+<c>* Compute the correct connected components</c>
+<l>connection (RegionMorph, ConnectedRegions)</l>
+<c>* Reduce each connected component (character) to its original shape</c>
+<l>intersection (ConnectedRegions, Region, RegionIntersection)</l>
+<c>* Constrain segmented regions due to size</c>
+<c>* TODO: Should be an input parameter</c>
+<l>select_shape (RegionIntersection, SelectedRegions, 'area', 'and', 100, 20000)</l>
+<c>* Sort the characters line-by-line</c>
+<l>sort_region (SelectedRegions, SortedRegions, 'character', 'true', 'row')</l>
+<c>* Set control input labels as character name set</c>
+<l>Chars := Labels</l>
+<c>* Create ocr training file</c>
+<l>write_ocr_trainf (SortedRegions, GrayImage, Chars, APPDATA_PUBLIC+OCRTrainingFilename)</l>
+<l>read_ocr_trainf_names (APPDATA_PUBLIC+OCRTrainingFilename, CharacterNames, CharacterCount)</l>
+<c>* Create mlp classifier </c>
+<l>create_ocr_class_mlp (8, 8, 'constant', ['pixel','ratio'], CharacterNames, 60, 'none', 10, 42, OCRHandle)</l>
+<c>* Train the classifier</c>
+<l>trainf_ocr_class_mlp (OCRHandle, APPDATA_PUBLIC+OCRTrainingFilename, 200, 1.0, 0.001, Error, ErrorLog)</l>
+<c>* Write classifier as ocr handle in specified file</c>
+<l>write_ocr_class_mlp (OCRHandle, APPDATA_PUBLIC+OCRFilename)</l>
+<c>* Delete ocr training file</c>
+<l>return ()</l>
+</body>
+<docu id="OCRTraining">
+<parameters>
+<parameter id="Labels"/>
+<parameter id="OCRFilename"/>
+<parameter id="OCRTrainingFilename"/>
+<parameter id="TrainingImage"/>
+<parameter id="WrittenFilename"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

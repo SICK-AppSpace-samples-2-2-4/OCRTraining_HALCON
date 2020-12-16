@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<manifest>
+    <application name="OCRTraining_HALCON">
+        <crown name="OCRTraining_HALCON">
+            <desc>user script</desc>
+            <serves/>
+        </crown>
+        <meta key="author">AppSpace Sample</meta>
+        <meta key="version">2.5.0</meta>
+        <meta key="licensed">false</meta>
+        <meta key="priority">low</meta>
+        <meta key="tags">OCR,Halcon12</meta>
+        <meta key="read-protected">false</meta>
+        <meta key="copy-protected">false</meta>
+        <entry path="resources">
+            <file type="text/plain">LabelFile.txt</file>
+            <file type="text/xml">OCRTraining.hdvp</file>
+            <file type="image">sicklogo.bmp</file>
+        </entry>
+        <entry path="scripts" default="OCRTraining.lua">
+            <file type="text/x-lua">OCRTraining.lua</file>
+        </entry>
+    </application>
+</manifest>
